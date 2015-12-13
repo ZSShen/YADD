@@ -33,6 +33,8 @@
 
 #include "base/macros.h"
 #include "atomic.h"
+#include "mem_map.h"
+#include "base/stringpiece.h"
 
 
 namespace art {
@@ -48,7 +50,7 @@ namespace mirror {
 }  // namespace mirror
 */
 //class ClassLinker;
-//class MemMap;
+class MemMap;
 class Signature;
 //template<class T> class Handle;
 class StringPiece;
@@ -387,7 +389,7 @@ class DexFile {
   // For .dex files, this is the header checksum.
   // For zip files, this is the classes.dex zip entry CRC32 checksum.
   // Return true if the checksum could be found, false otherwise.
-  //static bool GetChecksum(const char* filename, uint32_t* checksum, std::string* error_msg);
+  static bool GetChecksum(const char* filename, uint32_t* checksum, std::string* error_msg);
 
   // Opens .dex files found in the container, guessing the container format based on file extension.
   static bool Open(const char* filename, const char* location, std::string* error_msg,
@@ -923,7 +925,6 @@ class DexFile {
                              ZipOpenErrorCode* error_code);
 
   // Opens a .dex file at the given address backed by a MemMap
-  /*
   static const DexFile* OpenMemory(const std::string& location,
                                    uint32_t location_checksum,
                                    MemMap* mem_map,
@@ -936,14 +937,11 @@ class DexFile {
                                    uint32_t location_checksum,
                                    MemMap* mem_map,
                                    std::string* error_msg);
-  */
 
-  /*
   DexFile(const byte* base, size_t size,
           const std::string& location,
           uint32_t location_checksum,
           MemMap* mem_map);
-  */
 
   // Top-level initializer that calls other Init methods.
   bool Init(std::string* error_msg);
@@ -975,7 +973,7 @@ class DexFile {
   const uint32_t location_checksum_;
 
   // Manages the underlying memory allocation.
-  //std::unique_ptr<MemMap> mem_map_;
+  std::unique_ptr<MemMap> mem_map_;
 
   // Points to the header section.
   const Header* const header_;
