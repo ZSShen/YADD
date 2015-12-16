@@ -37,8 +37,8 @@ def main():
     if rebuild == False:
         return;
     for path_dir, list_dir, list_file in os.walk(path_cur):
-        if path_dir.endswith("android"):
-            path_build = path_dir.replace("android", "build");
+        if path_dir.endswith("engine"):
+            path_build = path_dir.replace("engine", "build");
             if os.path.isdir(path_build) == False:
                 os.makedirs(path_build);
 
