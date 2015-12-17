@@ -11,9 +11,10 @@
 class ScopedMap
 {
   public:
-    explicit ScopedMap(byte* base, size_t size)
+    explicit ScopedMap(byte* base, size_t size, size_t algn_size)
       : base_(base),
-        size_(size)
+        size_(size),
+        algn_size_(algn_size)
     {}
 
     ~ScopedMap()
@@ -23,33 +24,38 @@ class ScopedMap
 
     byte* GetBase() const
     {
-    	return base_;
+        return base_;
     }
 
     size_t GetSize() const
     {
-    	return size_;
+        return size_;
     }
 
-    void transfer(ScopedMap* p_rhs)
+    size_t GetAlignedSize() const
     {
-    	base_ = p_rhs->base_;
-    	size_ = p_rhs->size_;
-    	p_rhs->base_ = nullptr;
-    	p_rhs->size_ = 0;
+        return algn_size_;
     }
 
-    void reset(byte* new_base = nullptr, size_t new_size = 0)
+    void release()
     {
-    	if (base_ != nullptr && size_ != 0)
-    		munmap(base_, size_);
-    	base_ = new_base;
-    	size_ = new_size;
+        base_ = nullptr;
+        size_ = 0;
+        algn_size_ = 0;
+    }
+
+    void reset(byte* base = nullptr, size_t size = 0, size_t algn_size = 0)
+    {
+        if (base_ != nullptr && size_ != 0 && algn_size_ != 0)
+            munmap(base_, algn_size_);
+        base_ = base;
+        size_ = size;
+        algn_size_ = algn_size;
     }
 
 private:
-	byte* base_;
-	size_t size_;
+    byte* base_;
+    size_t size_, algn_size_;
 
     DISALLOW_COPY_AND_ASSIGN(ScopedMap);
 };

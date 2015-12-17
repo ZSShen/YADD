@@ -3,6 +3,7 @@
 #include "globals.h"
 #include "scoped_fd.h"
 #include "scoped_map.h"
+#include "dex_file.h"
 
 
 int main(int argc, char** argv)
@@ -17,18 +18,21 @@ int main(int argc, char** argv)
     ScopedFd fd(open(filename, O_RDONLY, 0));
     size_t size = static_cast<size_t>(lseek(fd.get(), 0, SEEK_END));
     div_t result = div(size, kPageSize);
-    if (result.rem != 0)
-        size = kPageSize * (result.quot + 1);
+    size_t algn_size = (result.rem != 0)? (kPageSize * (result.quot + 1)) :
+                                          (kPageSize * result.quot);
 
     // Map the file into memory.
-    byte* begin = reinterpret_cast<byte*>(mmap(nullptr, size, PROT_READ,
+    byte* base = reinterpret_cast<byte*>(mmap(nullptr, size, PROT_READ,
                                                MAP_PRIVATE, fd.get(), 0));
-    if (begin == MAP_FAILED) {
-        printf("Fail to map the dex file into memory.\n");
+    if (base == MAP_FAILED) {
+        ERROR("Fail to map the dex file into memory.");
         return -1;
     }
 
-    ScopedMap mem_map(begin, size);
+    ScopedMap mem_map(base, size, algn_size);
+    std::unique_ptr<const DexFile> dex_file(DexFile::OpenMemory(mem_map));
+    if (dex_file.get() == nullptr)
+        return -1;
 
     return 0;
 }

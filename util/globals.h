@@ -3,11 +3,19 @@
 #define _UTIL_GLOBALS_H_
 
 
+#include <vector>
+#include <string>
+#include <memory>
+#include <iostream>
+
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdarg.h>
+#include <string.h>
 
+#include <assert.h>
 #include <unistd.h>
 #include <errno.h>
 #include <fcntl.h>
