@@ -9,6 +9,7 @@
 #include "modifiers.h"
 #include "scoped_fd.h"
 #include "scoped_map.h"
+#include "leb128.h"
 
 
 class DexFile
@@ -375,6 +376,313 @@ class DexFile
 
     // Returns true if the byte string after the magic is the correct value.
     static bool IsVersionValid(const byte* magic);
+
+    /*------------------------------------------------------------------*
+     *             Functions for string_id_item Manipulation            *
+     *------------------------------------------------------------------*/
+    // Returns the number of string identifiers in the .dex file.
+    size_t NumStringIds() const
+    {
+        assert(header_ != nullptr);
+        return header_->string_ids_size_;
+    }
+
+    // Returns the StringId at the specified index.
+    const StringId& GetStringId(uint32_t idx) const
+    {
+        assert(idx < NumStringIds());
+        return string_ids_[idx];
+    }
+
+    uint32_t GetIndexForStringId(const StringId& string_id) const
+    {
+        assert(&string_id >= string_ids_);
+        assert(&string_id < string_ids_ + header_->string_ids_size_);
+        return &string_id - string_ids_;
+    }
+
+    int32_t GetStringLength(const StringId& string_id) const
+    {
+        const byte* ptr = begin_ + string_id.string_data_off_;
+        return DecodeUnsignedLeb128(&ptr);
+    }
+
+    // Returns a pointer to the UTF-8 string data referred to by the given
+    // string_id as well as the length of the string when decoded as a UTF-16
+    // string. Note the UTF-16 length is not the same as the string length of
+    // the string data.
+    inline const char* GetStringDataAndUtf16Length(const StringId& string_id,
+                                                   uint32_t* utf16_length) const
+    {
+        assert(utf16_length != NULL);
+        const byte* ptr = begin_ + string_id.string_data_off_;
+        *utf16_length = DecodeUnsignedLeb128(&ptr);
+        return reinterpret_cast<const char*>(ptr);
+    }
+
+    const char* GetStringData(const StringId& string_id) const
+    {
+        uint32_t ignored;
+        return GetStringDataAndUtf16Length(string_id, &ignored);
+    }
+
+    // Index version of GetStringDataAndUtf16Length.
+    const char* StringDataAndUtf16LengthByIdx(uint32_t idx, uint32_t* utf16_length) const
+    {
+        if (idx == kDexNoIndex) {
+            *utf16_length = 0;
+            return nullptr;
+        }
+        const StringId& string_id = GetStringId(idx);
+        return GetStringDataAndUtf16Length(string_id, utf16_length);
+    }
+
+    const char* StringDataByIdx(uint32_t idx) const
+    {
+        uint32_t unicode_length;
+        return StringDataAndUtf16LengthByIdx(idx, &unicode_length);
+    }
+
+
+    /*------------------------------------------------------------------*
+     *              Functions for type_id_item Manipulation             *
+     *------------------------------------------------------------------*/
+    // Returns the number of type identifiers in the .dex file.
+    uint32_t NumTypeIds() const
+    {
+        assert(header_ != nullptr);
+        return header_->type_ids_size_;
+    }
+
+    // Returns the TypeId at the specified index.
+    const TypeId& GetTypeId(uint32_t idx) const
+    {
+        assert(idx < NumTypeIds());
+        return type_ids_[idx];
+    }
+
+    uint16_t GetIndexForTypeId(const TypeId& type_id) const
+    {
+        assert(&type_id >= type_ids_);
+        assert(&type_id < type_ids_ + header_->type_ids_size_);
+        size_t result = &type_id - type_ids_;
+        assert(result < 65536U);
+        return static_cast<uint16_t>(result);
+    }
+
+    // Get the descriptor string associated with a given type index.
+    const char* StringByTypeIdx(uint32_t idx, uint32_t* unicode_length) const
+    {
+        const TypeId& type_id = GetTypeId(idx);
+        return StringDataAndUtf16LengthByIdx(type_id.descriptor_idx_, unicode_length);
+    }
+
+    const char* StringByTypeIdx(uint32_t idx) const
+    {
+        const TypeId& type_id = GetTypeId(idx);
+        return StringDataByIdx(type_id.descriptor_idx_);
+    }
+
+    // Returns the type descriptor string of a type id.
+    const char* GetTypeDescriptor(const TypeId& type_id) const
+    {
+        return StringDataByIdx(type_id.descriptor_idx_);
+    }
+
+
+    /*------------------------------------------------------------------*
+     *             Functions for field_id_item Manipulation             *
+     *------------------------------------------------------------------*/
+    // Returns the number of field identifiers in the .dex file.
+    size_t NumFieldIds() const
+    {
+        assert(header_ != nullptr);
+        return header_->field_ids_size_;
+    }
+
+    // Returns the FieldId at the specified index.
+    const FieldId& GetFieldId(uint32_t idx) const
+    {
+        assert(idx < NumFieldIds());
+        return field_ids_[idx];
+    }
+
+    uint32_t GetIndexForFieldId(const FieldId& field_id) const
+    {
+        assert(&field_id >= field_ids_);
+        assert(&field_id < field_ids_ + header_->field_ids_size_);
+        return &field_id - field_ids_;
+    }
+
+    // Returns the declaring class descriptor string of a field id.
+    const char* GetFieldDeclaringClassDescriptor(const FieldId& field_id) const
+    {
+        const DexFile::TypeId& type_id = GetTypeId(field_id.class_idx_);
+        return GetTypeDescriptor(type_id);
+    }
+
+    // Returns the class descriptor string of a field id.
+    const char* GetFieldTypeDescriptor(const FieldId& field_id) const
+    {
+        const DexFile::TypeId& type_id = GetTypeId(field_id.type_idx_);
+        return GetTypeDescriptor(type_id);
+    }
+
+    // Returns the name of a field id.
+    const char* GetFieldName(const FieldId& field_id) const
+    {
+        return StringDataByIdx(field_id.name_idx_);
+    }
+
+    /*------------------------------------------------------------------*
+     *             Functions for method_id_item Manipulation            *
+     *------------------------------------------------------------------*/
+    // Returns the number of method identifiers in the .dex file.
+    size_t NumMethodIds() const
+    {
+        assert(header_ != nullptr);
+        return header_->method_ids_size_;
+    }
+
+    // Returns the MethodId at the specified index.
+    const MethodId& GetMethodId(uint32_t idx) const
+    {
+        assert(idx < NumMethodIds());
+        return method_ids_[idx];
+    }
+
+    uint32_t GetIndexForMethodId(const MethodId& method_id) const
+    {
+        assert(&method_id >= method_ids_);
+        assert(&method_id < method_ids_ + header_->method_ids_size_);
+        return &method_id - method_ids_;
+    }
+
+    // Returns the declaring class descriptor string of a method id.
+    const char* GetMethodDeclaringClassDescriptor(const MethodId& method_id) const
+    {
+        const DexFile::TypeId& type_id = GetTypeId(method_id.class_idx_);
+        return GetTypeDescriptor(type_id);
+    }
+
+    // Returns the prototype of a method id.
+    const ProtoId& GetMethodPrototype(const MethodId& method_id) const
+    {
+        return GetProtoId(method_id.proto_idx_);
+    }
+
+    // Returns the name of a method id.
+    const char* GetMethodName(const MethodId& method_id) const
+    {
+        return StringDataByIdx(method_id.name_idx_);
+    }
+
+    // Returns the shorty of a method id.
+    const char* GetMethodShorty(const MethodId& method_id) const
+    {
+        return StringDataByIdx(GetProtoId(method_id.proto_idx_).shorty_idx_);
+    }
+
+    const char* GetMethodShorty(const MethodId& method_id, uint32_t* length) const
+    {
+        // Using the UTF16 length is safe here as shorties are guaranteed to be ASCII characters.
+        return StringDataAndUtf16LengthByIdx(GetProtoId(method_id.proto_idx_).shorty_idx_, length);
+    }
+
+
+    /*------------------------------------------------------------------*
+     *            Functions for class_def_item Manipulation             *
+     *------------------------------------------------------------------*/
+    // Returns the number of class definitions in the .dex file.
+    uint32_t NumClassDefs() const
+    {
+        assert(header_ != nullptr);
+        return header_->class_defs_size_;
+    }
+
+    // Returns the ClassDef at the specified index.
+    const ClassDef& GetClassDef(uint16_t idx) const
+    {
+        assert(idx < NumClassDefs());
+        return class_defs_[idx];
+    }
+
+    uint16_t GetIndexForClassDef(const ClassDef& class_def) const
+    {
+        assert(&class_def >= class_defs_);
+        assert(&class_def < class_defs_ + header_->class_defs_size_);
+        return &class_def - class_defs_;
+    }
+
+    // Returns the class descriptor string of a class definition.
+    const char* GetClassDescriptor(const ClassDef& class_def) const
+    {
+        return StringByTypeIdx(class_def.class_idx_);
+    }
+
+    const TypeList* GetInterfacesList(const ClassDef& class_def) const
+    {
+        if (class_def.interfaces_off_ == 0)
+            return nullptr;
+        else {
+            const byte* addr = begin_ + class_def.interfaces_off_;
+            return reinterpret_cast<const TypeList*>(addr);
+        }
+    }
+
+
+    /*------------------------------------------------------------------*
+     *    Functions for class_data_item and code_item Manipulation      *
+     *------------------------------------------------------------------*/
+    // Returns a pointer to the raw memory mapped class_data_item
+    const byte* GetClassData(const ClassDef& class_def) const
+    {
+        if (class_def.class_data_off_ == 0)
+            return nullptr;
+        else
+            return begin_ + class_def.class_data_off_;
+    }
+
+    const CodeItem* GetCodeItem(const uint32_t code_off) const
+    {
+        if (code_off == 0)
+            return nullptr;  // native or abstract method
+        else {
+            const byte* addr = begin_ + code_off;
+            return reinterpret_cast<const CodeItem*>(addr);
+        }
+    }
+
+
+    /*------------------------------------------------------------------*
+     *             Functions for proto_id_item Manipulation             *
+     *------------------------------------------------------------------*/
+    const char* GetReturnTypeDescriptor(const ProtoId& proto_id) const
+    {
+        return StringByTypeIdx(proto_id.return_type_idx_);
+    }
+
+    // Returns the number of prototype identifiers in the .dex file.
+    size_t NumProtoIds() const
+    {
+        assert(header_ != nullptr);
+        return header_->proto_ids_size_;
+    }
+
+    // Returns the ProtoId at the specified index.
+    const ProtoId& GetProtoId(uint32_t idx) const
+    {
+        assert(idx < NumProtoIds());
+        return proto_ids_[idx];
+    }
+
+    uint16_t GetIndexForProtoId(const ProtoId& proto_id) const
+    {
+        assert(&proto_id >= proto_ids_);
+        assert(&proto_id < proto_ids_ + header_->proto_ids_size_);
+        return &proto_id - proto_ids_;
+    }
+
 
   private:
 

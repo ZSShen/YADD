@@ -35,9 +35,9 @@ include_directories(${PATH_INC_UTIL})
 #)
 
 add_executable(${TGE_EXE}
+               ${PATH_SRC_SPEW}
                ${PATH_SRC_DEX_FILE}
-               ${PATH_SRC_DUMPER}
-               ${PATH_SRC_SPEW})
+               ${PATH_SRC_DUMPER})
 
 set_target_properties(${TGE_EXE} PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY ${PATH_OUT}

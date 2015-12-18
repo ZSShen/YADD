@@ -34,5 +34,12 @@ int main(int argc, char** argv)
     if (dex_file.get() == nullptr)
         return -1;
 
+    size_t num_class_def = dex_file->NumClassDefs();
+    for (size_t idx = 0 ; idx < num_class_def ; ++idx) {
+        const DexFile::ClassDef& class_def = dex_file->GetClassDef(idx);
+        const char* descriptor = dex_file->GetClassDescriptor(class_def);
+        printf("%s\n", descriptor);
+    }
+
     return 0;
 }
