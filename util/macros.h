@@ -12,6 +12,15 @@
     TypeName(const TypeName&);                          \
     void operator=(const TypeName&)
 
+// A macro to disallow all the implicit constructors, namely the default
+// constructor, copy constructor and operator= functions. This should be used in
+// the private: declarations for a class that wants to prevent anyone from
+// instantiating it. This is especially useful for classes containing only
+// static methods.
+#define DISALLOW_IMPLICIT_CONSTRUCTORS(TypeName) 		\
+  	TypeName();                                    		\
+  	DISALLOW_COPY_AND_ASSIGN(TypeName)
+
 // Hint compiler to generate optimized code for branch prediction.
 #define LIKELY(x)       __builtin_expect((x), true)
 #define UNLIKELY(x)     __builtin_expect((x), false)

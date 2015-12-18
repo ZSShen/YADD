@@ -6,6 +6,11 @@
 #include "dex_file.h"
 
 
+void SkipAllFields();
+bool DumpDexFile(const DexFile& dex_file);
+bool DumpDexClass(const DexFile& dex_file, const DexFile::ClassDef& class_def);
+
+
 int main(int argc, char** argv)
 {
     if (argc != 2) {
@@ -34,12 +39,93 @@ int main(int argc, char** argv)
     if (dex_file.get() == nullptr)
         return -1;
 
-    size_t num_class_def = dex_file->NumClassDefs();
-    for (size_t idx = 0 ; idx < num_class_def ; ++idx) {
-        const DexFile::ClassDef& class_def = dex_file->GetClassDef(idx);
-        const char* descriptor = dex_file->GetClassDescriptor(class_def);
-        printf("%s\n", descriptor);
-    }
+    DumpDexFile(*dex_file.get());
 
     return 0;
+}
+
+
+void SkipAllFields(ClassDataItemIterator& it)
+{
+    while (it.HasNextStaticField())
+        it.Next();
+    while (it.HasNextInstanceField())
+        it.Next();
+}
+
+bool DumpDexFile(const DexFile& dex_file)
+{
+    size_t num_class_def = dex_file.NumClassDefs();
+    for (size_t idx = 0 ; idx < num_class_def ; ++idx) {
+        const DexFile::ClassDef& class_def = dex_file.GetClassDef(idx);
+        const char* descriptor = dex_file.GetClassDescriptor(class_def);
+        printf("%s\n", descriptor);
+        DumpDexClass(dex_file, class_def);
+    }
+    return true;
+}
+
+bool DumpDexClass(const DexFile& dex_file, const DexFile::ClassDef& class_def)
+{
+    bool rc = true;
+    const byte* class_data = dex_file.GetClassData(class_def);
+    if (class_data == nullptr)  // empty class such as a marker interface?
+        return rc;
+
+    ClassDataItemIterator it(dex_file, class_data);
+    SkipAllFields(it);
+    //uint32_t class_method_index = 0;
+    while (it.HasNextDirectMethod()) {
+        uint32_t method_idx = it.GetMemberIndex();
+        const DexFile::MethodId& method_id = dex_file.GetMethodId(method_idx);
+        const DexFile::ProtoId& proto_id = dex_file.GetMethodPrototype(method_id);
+
+        const char* method_name = dex_file.GetMethodName(method_id);
+        const char* rtn_type = dex_file.GetReturnTypeDescriptor(proto_id);
+        const DexFile::TypeList* params = dex_file.GetProtoParameters(proto_id);
+
+        std::stringstream str_stream;
+        str_stream << '(';
+        if (params) {
+            uint32_t param_count = params->Size();
+            for (uint32_t idx = 0 ; idx < param_count - 1 ; ++idx) {
+                str_stream << dex_file.StringByTypeIdx(params->GetTypeItem(idx).type_idx_);
+                str_stream << ", ";
+            }
+            str_stream << dex_file.StringByTypeIdx(params->GetTypeItem(param_count - 1).type_idx_);
+        }
+        str_stream << ')';
+
+        printf("\t%s %s %s\n", rtn_type, method_name, str_stream.str().c_str());
+        //class_method_index++;
+        it.Next();
+    }
+    while (it.HasNextVirtualMethod()) {
+        uint32_t method_idx = it.GetMemberIndex();
+        const DexFile::MethodId& method_id = dex_file.GetMethodId(method_idx);
+        const DexFile::ProtoId& proto_id = dex_file.GetMethodPrototype(method_id);
+
+        const char* method_name = dex_file.GetMethodName(method_id);
+        const char* rtn_type = dex_file.GetReturnTypeDescriptor(proto_id);
+        const DexFile::TypeList* params = dex_file.GetProtoParameters(proto_id);
+
+        std::stringstream str_stream;
+        str_stream << '(';
+        if (params) {
+            uint32_t param_count = params->Size();
+            for (uint32_t idx = 0 ; idx < param_count - 1 ; ++idx) {
+                str_stream << dex_file.StringByTypeIdx(params->GetTypeItem(idx).type_idx_);
+                str_stream << ", ";
+            }
+            str_stream << dex_file.StringByTypeIdx(params->GetTypeItem(param_count - 1).type_idx_);
+        }
+        str_stream << ')';
+
+        printf("\t%s %s %s\n", rtn_type, method_name, str_stream.str().c_str());
+        //class_method_index++;
+        it.Next();
+    }
+    assert(!it.HasNext());
+
+    return rc;
 }

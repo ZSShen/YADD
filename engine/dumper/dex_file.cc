@@ -58,3 +58,29 @@ const DexFile* DexFile::OpenMemory(byte* base, size_t size, ScopedMap& mem_map)
     return dex_file.release();
 }
 
+// Decodes the header section from the class data bytes.
+void ClassDataItemIterator::ReadClassDataHeader()
+{
+    assert(ptr_pos_ != nullptr);
+    header_.static_fields_size_ = DecodeUnsignedLeb128(&ptr_pos_);
+    header_.instance_fields_size_ = DecodeUnsignedLeb128(&ptr_pos_);
+    header_.direct_methods_size_ = DecodeUnsignedLeb128(&ptr_pos_);
+    header_.virtual_methods_size_ = DecodeUnsignedLeb128(&ptr_pos_);
+}
+
+void ClassDataItemIterator::ReadClassDataField()
+{
+    field_.field_idx_delta_ = DecodeUnsignedLeb128(&ptr_pos_);
+    field_.access_flags_ = DecodeUnsignedLeb128(&ptr_pos_);
+    if (last_idx_ != 0 && field_.field_idx_delta_ == 0)
+        LOG("Duplicated field.");
+}
+
+void ClassDataItemIterator::ReadClassDataMethod()
+{
+    method_.method_idx_delta_ = DecodeUnsignedLeb128(&ptr_pos_);
+    method_.access_flags_ = DecodeUnsignedLeb128(&ptr_pos_);
+    method_.code_off_ = DecodeUnsignedLeb128(&ptr_pos_);
+    if (last_idx_ != 0 && method_.method_idx_delta_ == 0)
+        LOG("Duplicated method.");
+}
