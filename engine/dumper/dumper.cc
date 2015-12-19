@@ -5,11 +5,13 @@
 #include "scoped_map.h"
 #include "dex_file.h"
 #include "dex_instruction.h"
+#include "stringprintf.h"
 
 
 void SkipAllFields();
 bool DumpDexFile(const DexFile& dex_file);
 bool DumpDexClass(const DexFile& dex_file, const DexFile::ClassDef& class_def);
+void DumpDexCode(const DexFile& dex_file, const DexFile::CodeItem* code_item);
 
 
 int main(int argc, char** argv)
@@ -98,6 +100,9 @@ bool DumpDexClass(const DexFile& dex_file, const DexFile::ClassDef& class_def)
         str_stream << ')';
 
         printf("\t%s %s %s\n", rtn_type, method_name, str_stream.str().c_str());
+        const DexFile::CodeItem* code_item = it.GetMethodCodeItem();
+        DumpDexCode(dex_file, code_item);
+
         //class_method_index++;
         it.Next();
     }
@@ -123,10 +128,26 @@ bool DumpDexClass(const DexFile& dex_file, const DexFile::ClassDef& class_def)
         str_stream << ')';
 
         printf("\t%s %s %s\n", rtn_type, method_name, str_stream.str().c_str());
+        const DexFile::CodeItem* code_item = it.GetMethodCodeItem();
+        DumpDexCode(dex_file, code_item);
+
         //class_method_index++;
         it.Next();
     }
     assert(!it.HasNext());
 
     return rc;
+}
+
+void DumpDexCode(const DexFile& dex_file, const DexFile::CodeItem* code_item)
+{
+    if (code_item != nullptr) {
+        size_t i = 0;
+        while (i < code_item->insns_size_in_code_units_) {
+            const Instruction* instruction = Instruction::At(&code_item->insns_[i]);
+            std::string str =  StringPrintf("0x%04zx: %s", i, instruction->DumpString(&dex_file).c_str());
+            i += instruction->SizeInCodeUnits();
+            printf("\t\t%s\n", str.c_str());
+        }
+    }
 }

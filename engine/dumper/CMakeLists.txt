@@ -48,6 +48,7 @@ add_executable(${TGE_EXE}
                ${PATH_SRC_STRINGPRINTF}
                ${PATH_SRC_SPEW}
                ${PATH_SRC_DEX_FILE}
+               ${PATH_SRC_DEX_INSTRUCTION}
                ${PATH_SRC_DUMPER})
 
 set_target_properties(${TGE_EXE} PROPERTIES

@@ -2,7 +2,7 @@
 #include "misc.h"
 #include "stringprintf.h"
 #include "spew.h"
-#include "dex_instruction.h"
+#include "dex_instruction-inl.h"
 #include "dex_file.h"
 
 
