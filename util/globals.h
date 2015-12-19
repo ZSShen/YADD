@@ -8,13 +8,14 @@
 #include <memory>
 #include <sstream>
 #include <iostream>
+#include <iomanip>
 
 #include <stddef.h>
-#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
 #include <string.h>
+#include <inttypes.h>
 
 #include <assert.h>
 #include <unistd.h>
@@ -37,5 +38,7 @@ static constexpr size_t GB = KB * KB * KB;
 // System page size.
 static constexpr int kPageSize = 4096;
 
+// Log buffer size.
+static constexpr int kBlahSize = 1024;
 
 #endif

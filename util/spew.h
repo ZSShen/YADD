@@ -6,9 +6,6 @@
 #include "globals.h"
 
 
-#define SIZE_MID_BLAH 	(1024)
-
-
 #define ERROR(...)      SpewMsg(__FILE__, __FUNCTION__, __LINE__, __VA_ARGS__)
 #define LOG(...)        SpewMsg(__VA_ARGS__)
 

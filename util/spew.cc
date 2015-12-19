@@ -9,8 +9,8 @@
                 int32_t len = vsnprintf(buf, sizeof(buf), format, args);        \
                 va_end(args);                                                   \
                                                                                 \
-                if ((len == -1) || (len >= SIZE_MID_BLAH)) {                    \
-                    len = SIZE_MID_BLAH - 1;                                    \
+                if ((len == -1) || (len >= kBlahSize)) {                        \
+                    len = kBlahSize - 1;                                        \
                     buf[len] = 0;                                               \
                 } else if(len == 0) {                                           \
                     len = 0;                                                    \
@@ -23,7 +23,7 @@
 void SpewMsg(const char* file, const char* func, const int32_t line,
              const char* format, ...)
 {
-    char buf[SIZE_MID_BLAH];
+    char buf[kBlahSize];
     SPEW()
     sprintf(buf, "\t\tat line: %d  in function: %s/%s", line, file, func);
     std::cout << buf << std::endl;
@@ -31,6 +31,6 @@ void SpewMsg(const char* file, const char* func, const int32_t line,
 
 void SpewMsg(const char* format, ...)
 {
-    char buf[SIZE_MID_BLAH];
+    char buf[kBlahSize];
     SPEW()
 }

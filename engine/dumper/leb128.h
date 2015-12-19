@@ -4,6 +4,7 @@
 
 
 #include "globals.h"
+#include "misc.h"
 
 
 // Reads an unsigned LEB128 value, updating the given pointer to point

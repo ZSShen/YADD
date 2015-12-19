@@ -21,6 +21,8 @@
   	TypeName();                                    		\
   	DISALLOW_COPY_AND_ASSIGN(TypeName)
 
+#define PACKED(x) __attribute__ ((__aligned__(x), __packed__))
+
 // Hint compiler to generate optimized code for branch prediction.
 #define LIKELY(x)       __builtin_expect((x), true)
 #define UNLIKELY(x)     __builtin_expect((x), false)

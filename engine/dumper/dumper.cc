@@ -4,6 +4,7 @@
 #include "scoped_fd.h"
 #include "scoped_map.h"
 #include "dex_file.h"
+#include "dex_instruction.h"
 
 
 void SkipAllFields();

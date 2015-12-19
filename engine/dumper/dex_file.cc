@@ -1,6 +1,5 @@
 
 #include "dex_file.h"
-//#include "dex_file-inl.h"
 
 
 const byte DexFile::kDexMagic[] = { 'd', 'e', 'x', '\n' };

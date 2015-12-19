@@ -5,11 +5,16 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
 set(ROOT_SRC "${CMAKE_CURRENT_SOURCE_DIR}")
 
-set(PATH_SRC_DEX_FILE "${ROOT_SRC}/dex_file.cc")
-set(PATH_SRC_DUMPER "${ROOT_SRC}/dumper.cc")
-set(PATH_SRC_SPEW "${ROOT_SRC}/../../util/spew.cc")
+set(PATH_SRC_DEX_FILE        	"${ROOT_SRC}/dex_file.cc")
+set(PATH_SRC_DEX_INSTRUCTION 	"${ROOT_SRC}/dex_instruction.cc")
+set(PATH_SRC_DUMPER         	"${ROOT_SRC}/dumper.cc")
+set(PATH_SRC_SPEW           	"${ROOT_SRC}/../../util/spew.cc")
+set(PATH_SRC_STRINGPRINTF   	"${ROOT_SRC}/../../util/stringprintf.cc")
+set(PATH_SRC_MISC           	"${ROOT_SRC}/../../util/misc.cc")
+set(PATH_SRC_UTF            	"${ROOT_SRC}/../../util/utf.cc")
 
 set(PATH_INC_UTIL "${ROOT_SRC}/../../util/")
+set(PATH_INC_DUMPER "${ROOT_SRC}")
 
 set(PATH_OUT "${ROOT_SRC}/../../bin")
 
@@ -24,7 +29,8 @@ set(EXE_NAME "dumper")
 set(TGE_EXE "DUMPER")
 
 
-include_directories(${PATH_INC_UTIL})
+include_directories(${PATH_INC_DUMPER}
+					${PATH_INC_UTIL})
 
 #add_library(${TGE_LIB} ${LIB_TYPE}
 #           ${PATH_SRC_DEX_FILE})
@@ -35,6 +41,9 @@ include_directories(${PATH_INC_UTIL})
 #)
 
 add_executable(${TGE_EXE}
+               ${PATH_SRC_UTF}
+               ${PATH_SRC_MISC}
+               ${PATH_SRC_STRINGPRINTF}
                ${PATH_SRC_SPEW}
                ${PATH_SRC_DEX_FILE}
                ${PATH_SRC_DUMPER})
