@@ -7,8 +7,11 @@
 #include <string>
 #include <memory>
 #include <sstream>
+#include <algorithm>
+#include <utility>
 #include <iostream>
 #include <iomanip>
+#include <iosfwd>
 
 #include <stddef.h>
 #include <stdio.h>

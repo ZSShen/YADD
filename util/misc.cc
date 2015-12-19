@@ -95,6 +95,62 @@ std::string PrettyField(uint32_t field_idx, const DexFile& dex_file, bool with_t
     return result;
 }
 
+std::string PrettyArguments(const char* signature)
+{
+    std::string result;
+    result += '(';
+    assert(*signature == '(');
+    ++signature;  // Skip the '('.
+    while (*signature != ')') {
+        size_t argument_length = 0;
+        while (signature[argument_length] == '[')
+            ++argument_length;
+        if (signature[argument_length] == 'L')
+            argument_length = (strchr(signature, ';') - signature + 1);
+        else
+            ++argument_length;
+        {
+            std::string argument_descriptor(signature, argument_length);
+            result += PrettyDescriptor(argument_descriptor.c_str());
+        }
+        if (signature[argument_length] != ')')
+            result += ", ";
+        signature += argument_length;
+    }
+    assert(*signature == ')');
+    ++signature;  // Skip the ')'.
+    result += ')';
+    return result;
+}
+
+std::string PrettyReturnType(const char* signature)
+{
+    const char* return_type = strchr(signature, ')');
+    assert(return_type != NULL);
+    ++return_type;  // Skip ')'.
+    return PrettyDescriptor(return_type);
+}
+
+std::string PrettyMethod(uint32_t method_idx, const DexFile& dex_file, bool with_signature)
+{
+    if (method_idx >= dex_file.NumMethodIds())
+        return StringPrintf("<<invalid-method-idx-%d>>", method_idx);
+
+    const DexFile::MethodId& method_id = dex_file.GetMethodId(method_idx);
+    std::string result(PrettyDescriptor(dex_file.GetMethodDeclaringClassDescriptor(method_id)));
+    result += '.';
+    result += dex_file.GetMethodName(method_id);
+    if (with_signature) {
+        const Signature signature = dex_file.GetMethodSignature(method_id);
+        std::string sig_as_string(signature.ToString());
+        if (signature == Signature::NoSignature())
+            return result + sig_as_string;
+        result = PrettyReturnType(sig_as_string.c_str()) + " " + result +
+        PrettyArguments(sig_as_string.c_str());
+    }
+    return result;
+}
+
 std::string PrettyType(uint32_t type_idx, const DexFile& dex_file)
 {
     if (type_idx >= dex_file.NumTypeIds())

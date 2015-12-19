@@ -11,7 +11,11 @@
 #include "scoped_fd.h"
 #include "scoped_map.h"
 #include "leb128.h"
+#include "stringpiece.h"
 
+
+class Signature;
+//class StringPiece;
 
 class DexFile
 {
@@ -572,6 +576,8 @@ class DexFile
         return GetProtoId(method_id.proto_idx_);
     }
 
+    const Signature GetMethodSignature(const MethodId& method_id) const;
+
     // Returns the name of a method id.
     const char* GetMethodName(const MethodId& method_id) const
     {
@@ -740,6 +746,40 @@ class DexFile
 };
 
 
+// Abstract the signature of a method.
+class Signature
+{
+  public:
+    std::string ToString() const;
+
+    static Signature NoSignature()
+    {
+        return Signature();
+    }
+
+    bool operator==(const Signature& rhs) const;
+    bool operator!=(const Signature& rhs) const
+    {
+        return !(*this == rhs);
+    }
+
+    bool operator==(const StringPiece& rhs) const;
+
+  private:
+    Signature(const DexFile* dex, const DexFile::ProtoId& proto)
+      : dex_file_(dex), proto_id_(&proto)
+    {}
+
+    Signature()
+      : dex_file_(nullptr), proto_id_(nullptr)
+    {}
+
+    friend class DexFile;
+
+    const DexFile* const dex_file_;
+    const DexFile::ProtoId* const proto_id_;
+};
+
 // Iterate and decode class_data_item.
 class ClassDataItemIterator
 {
@@ -803,26 +843,26 @@ class ClassDataItemIterator
     {
         pos_++;
         if (pos_ < EndOfStaticFieldsPos()) {
-          last_idx_ = GetMemberIndex();
-          ReadClassDataField();
+            last_idx_ = GetMemberIndex();
+            ReadClassDataField();
         } else if (pos_ == EndOfStaticFieldsPos() && NumInstanceFields() > 0) {
-          last_idx_ = 0;  // transition to next array, reset last index
-          ReadClassDataField();
+            last_idx_ = 0;  // transition to next array, reset last index
+            ReadClassDataField();
         } else if (pos_ < EndOfInstanceFieldsPos()) {
-          last_idx_ = GetMemberIndex();
-          ReadClassDataField();
+            last_idx_ = GetMemberIndex();
+            ReadClassDataField();
         } else if (pos_ == EndOfInstanceFieldsPos() && NumDirectMethods() > 0) {
-          last_idx_ = 0;  // transition to next array, reset last index
-          ReadClassDataMethod();
+            last_idx_ = 0;  // transition to next array, reset last index
+            ReadClassDataMethod();
         } else if (pos_ < EndOfDirectMethodsPos()) {
-          last_idx_ = GetMemberIndex();
-          ReadClassDataMethod();
+            last_idx_ = GetMemberIndex();
+            ReadClassDataMethod();
         } else if (pos_ == EndOfDirectMethodsPos() && NumVirtualMethods() > 0) {
-          last_idx_ = 0;  // transition to next array, reset last index
-          ReadClassDataMethod();
+            last_idx_ = 0;  // transition to next array, reset last index
+            ReadClassDataMethod();
         } else if (pos_ < EndOfVirtualMethodsPos()) {
-          last_idx_ = GetMemberIndex();
-          ReadClassDataMethod();
+            last_idx_ = GetMemberIndex();
+            ReadClassDataMethod();
         } else
             assert(!HasNext());
     }

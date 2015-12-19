@@ -30,6 +30,11 @@ std::string PrettyDescriptor(const char* descriptor);
 std::string PrettyField(uint32_t field_idx, const DexFile& dex_file,
                         bool with_type = true);
 
+// Returns a human-readable signature for a method. Something like "a.b.C.m" or
+// "a.b.C.m(II)V" (depending on the value of 'with_signature').
+std::string PrettyMethod(uint32_t method_idx, const DexFile& dex_file,
+						 bool with_signature = true);
+
 // Returns a human-readable form of the type at an index in the specified dex file.
 // Example outputs: char[], java.lang.String.
 std::string PrettyType(uint32_t type_idx, const DexFile& dex_file);
