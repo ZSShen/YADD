@@ -6,10 +6,11 @@
 #include "globals.h"
 #include "macros.h"
 #include "spew.h"
-#include "modifiers.h"
-#include "invoke_type.h"
 #include "scoped_fd.h"
 #include "scoped_map.h"
+
+#include "modifiers.h"
+#include "invoke_type.h"
 #include "leb128.h"
 #include "stringpiece.h"
 
@@ -406,24 +407,14 @@ class DexFile
         return &string_id - string_ids_;
     }
 
-    int32_t GetStringLength(const StringId& string_id) const
-    {
-        const byte* ptr = begin_ + string_id.string_data_off_;
-        return DecodeUnsignedLeb128(&ptr);
-    }
+    int32_t GetStringLength(const StringId& string_id) const;
 
     // Returns a pointer to the UTF-8 string data referred to by the given
     // string_id as well as the length of the string when decoded as a UTF-16
     // string. Note the UTF-16 length is not the same as the string length of
     // the string data.
-    inline const char* GetStringDataAndUtf16Length(const StringId& string_id,
-                                                   uint32_t* utf16_length) const
-    {
-        assert(utf16_length != NULL);
-        const byte* ptr = begin_ + string_id.string_data_off_;
-        *utf16_length = DecodeUnsignedLeb128(&ptr);
-        return reinterpret_cast<const char*>(ptr);
-    }
+    const char* GetStringDataAndUtf16Length(const StringId& string_id,
+                                            uint32_t* utf16_length) const;
 
     const char* GetStringData(const StringId& string_id) const
     {

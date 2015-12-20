@@ -3,6 +3,7 @@
 #include "stringprintf.h"
 #include "misc.h"
 #include "utf.h"
+#include "dex_file-inl.h"
 
 
 std::string PrintableString(const char* utf)
