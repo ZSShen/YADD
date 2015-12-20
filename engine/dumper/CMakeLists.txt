@@ -13,6 +13,7 @@ set(PATH_SRC_STRINGPRINTF       "${ROOT_SRC}/../../util/stringprintf.cc")
 set(PATH_SRC_STRINGPIECE        "${ROOT_SRC}/../../util/stringpiece.cc")
 set(PATH_SRC_MISC               "${ROOT_SRC}/../../util/misc.cc")
 set(PATH_SRC_UTF                "${ROOT_SRC}/../../util/utf.cc")
+set(PATH_SRC_CMD_OPT            "${ROOT_SRC}/../../util/cmd_opt.cc")
 
 set(PATH_INC_UTIL "${ROOT_SRC}/../../util/")
 set(PATH_INC_DUMPER "${ROOT_SRC}")
@@ -49,6 +50,7 @@ add_executable(${TGE_EXE}
                ${PATH_SRC_SPEW}
                ${PATH_SRC_DEX_FILE}
                ${PATH_SRC_DEX_INSTRUCTION}
+               ${PATH_SRC_CMD_OPT}
                ${PATH_SRC_DUMPER})
 
 set_target_properties(${TGE_EXE} PROPERTIES

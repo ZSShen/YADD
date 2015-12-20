@@ -1,10 +1,14 @@
 
 #include "globals.h"
+#include "status.h"
+#include "cmd_opt.h"
+
 #include "scoped_fd.h"
 #include "scoped_map.h"
+#include "stringprintf.h"
+
 #include "dex_file.h"
 #include "dex_instruction.h"
-#include "stringprintf.h"
 
 
 void SkipAllFields();
@@ -15,14 +19,13 @@ void DumpDexCode(std::ostream&, const DexFile&, const DexFile::CodeItem*);
 
 int main(int argc, char** argv)
 {
-    if (argc != 2) {
-        printf("Please specify the input filename.\n");
-        return -1;
-    }
-    const char* filename = argv[1];
+    char *opt_granu, *opt_in, *opt_out;
+
+    if (!ParseDumperOption(argc, argv, &opt_granu, &opt_in, &opt_out))
+        return kExitError;
 
     // Calculate the to be mapped space size.
-    ScopedFd fd(open(filename, O_RDONLY, 0));
+    ScopedFd fd(open(opt_in, O_RDONLY, 0));
     size_t size = static_cast<size_t>(lseek(fd.get(), 0, SEEK_END));
     div_t result = div(size, kPageSize);
     size_t algn_size = (result.rem != 0)? (kPageSize * (result.quot + 1)) :
@@ -33,17 +36,16 @@ int main(int argc, char** argv)
                                                MAP_PRIVATE, fd.get(), 0));
     if (base == MAP_FAILED) {
         ERROR("Fail to map the dex file into memory.");
-        return -1;
+        return kExitError;
     }
 
     ScopedMap mem_map(base, size, algn_size);
     std::unique_ptr<const DexFile> dex_file(DexFile::OpenMemory(mem_map));
     if (dex_file.get() == nullptr)
-        return -1;
+        return kExitError;
 
     DumpDexFile(std::cout, *dex_file.get());
-
-    return 0;
+    return kExitSucc;
 }
 
 

@@ -19,6 +19,7 @@
 #include <stdarg.h>
 #include <string.h>
 #include <inttypes.h>
+#include <getopt.h>
 
 #include <assert.h>
 #include <unistd.h>
@@ -41,7 +42,8 @@ static constexpr size_t GB = KB * KB * KB;
 // System page size.
 static constexpr int kPageSize = 4096;
 
-// Log buffer size.
-static constexpr int kBlahSize = 1024;
+// Auxiliary buffer size.
+static constexpr int kBlahSize 		= 1024;
+static constexpr int kBlahSizeTiny 	= 128;
 
 #endif
