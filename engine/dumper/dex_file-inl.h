@@ -13,7 +13,7 @@ inline int32_t DexFile::GetStringLength(const StringId& string_id) const
 }
 
 inline const char* DexFile::GetStringDataAndUtf16Length(const StringId& string_id,
-                                               			uint32_t* utf16_length) const
+                                                        uint32_t* utf16_length) const
 {
     assert(utf16_length != NULL);
     const byte* ptr = begin_ + string_id.string_data_off_;
