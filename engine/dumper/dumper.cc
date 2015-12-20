@@ -1,5 +1,4 @@
 
-
 #include "globals.h"
 #include "scoped_fd.h"
 #include "scoped_map.h"
@@ -9,9 +8,9 @@
 
 
 void SkipAllFields();
-bool DumpDexFile(const DexFile& dex_file);
-bool DumpDexClass(const DexFile& dex_file, const DexFile::ClassDef& class_def);
-void DumpDexCode(const DexFile& dex_file, const DexFile::CodeItem* code_item);
+void DumpDexFile(std::ostream&, const DexFile&);
+void DumpDexClass(std::ostream&, const DexFile&, const DexFile::ClassDef&);
+void DumpDexCode(std::ostream&, const DexFile&, const DexFile::CodeItem*);
 
 
 int main(int argc, char** argv)
@@ -42,7 +41,7 @@ int main(int argc, char** argv)
     if (dex_file.get() == nullptr)
         return -1;
 
-    DumpDexFile(*dex_file.get());
+    DumpDexFile(std::cout, *dex_file.get());
 
     return 0;
 }
@@ -56,98 +55,65 @@ void SkipAllFields(ClassDataItemIterator& it)
         it.Next();
 }
 
-bool DumpDexFile(const DexFile& dex_file)
+void DumpDexFile(std::ostream& os, const DexFile& dex_file)
 {
-    size_t num_class_def = dex_file.NumClassDefs();
-    for (size_t idx = 0 ; idx < num_class_def ; ++idx) {
-        const DexFile::ClassDef& class_def = dex_file.GetClassDef(idx);
+    uint32_t num_class_def = dex_file.NumClassDefs();
+    for (uint32_t class_def_idx = 0 ; class_def_idx < num_class_def ; ++class_def_idx) {
+        const DexFile::ClassDef& class_def = dex_file.GetClassDef(class_def_idx);
         const char* descriptor = dex_file.GetClassDescriptor(class_def);
-        printf("%s\n", descriptor);
-        DumpDexClass(dex_file, class_def);
+        os << StringPrintf("%d: %s\n", class_def_idx, descriptor);
+        DumpDexClass(os, dex_file, class_def);
+        os << '\n';
     }
-    return true;
 }
 
-bool DumpDexClass(const DexFile& dex_file, const DexFile::ClassDef& class_def)
+void DumpDexClass(std::ostream& os, const DexFile& dex_file,
+                  const DexFile::ClassDef& class_def)
 {
-    bool rc = true;
     const byte* class_data = dex_file.GetClassData(class_def);
     if (class_data == nullptr)  // empty class such as a marker interface?
-        return rc;
+        return;
 
     ClassDataItemIterator it(dex_file, class_data);
     SkipAllFields(it);
-    //uint32_t class_method_index = 0;
+
+    uint32_t class_method_idx = 0;
     while (it.HasNextDirectMethod()) {
-        uint32_t method_idx = it.GetMemberIndex();
-        const DexFile::MethodId& method_id = dex_file.GetMethodId(method_idx);
-        const DexFile::ProtoId& proto_id = dex_file.GetMethodPrototype(method_id);
-
-        const char* method_name = dex_file.GetMethodName(method_id);
-        const char* rtn_type = dex_file.GetReturnTypeDescriptor(proto_id);
-        const DexFile::TypeList* params = dex_file.GetProtoParameters(proto_id);
-
-        std::stringstream str_stream;
-        str_stream << '(';
-        if (params) {
-            uint32_t param_count = params->Size();
-            for (uint32_t idx = 0 ; idx < param_count - 1 ; ++idx) {
-                str_stream << dex_file.StringByTypeIdx(params->GetTypeItem(idx).type_idx_);
-                str_stream << ", ";
-            }
-            str_stream << dex_file.StringByTypeIdx(params->GetTypeItem(param_count - 1).type_idx_);
-        }
-        str_stream << ')';
-
-        printf("\t%s %s %s\n", rtn_type, method_name, str_stream.str().c_str());
+        uint32_t dex_method_idx = it.GetMemberIndex();
+        os << StringPrintf("\t%d: %s (dex_method_idx=%d)\n", class_method_idx,
+                           PrettyMethod(dex_method_idx, dex_file, true).c_str(),
+                           dex_method_idx);
         const DexFile::CodeItem* code_item = it.GetMethodCodeItem();
-        DumpDexCode(dex_file, code_item);
-
-        //class_method_index++;
+        DumpDexCode(os, dex_file, code_item);
+        os << '\n';
         it.Next();
+        ++class_method_idx;
     }
+
     while (it.HasNextVirtualMethod()) {
-        uint32_t method_idx = it.GetMemberIndex();
-        const DexFile::MethodId& method_id = dex_file.GetMethodId(method_idx);
-        const DexFile::ProtoId& proto_id = dex_file.GetMethodPrototype(method_id);
-
-        const char* method_name = dex_file.GetMethodName(method_id);
-        const char* rtn_type = dex_file.GetReturnTypeDescriptor(proto_id);
-        const DexFile::TypeList* params = dex_file.GetProtoParameters(proto_id);
-
-        std::stringstream str_stream;
-        str_stream << '(';
-        if (params) {
-            uint32_t param_count = params->Size();
-            for (uint32_t idx = 0 ; idx < param_count - 1 ; ++idx) {
-                str_stream << dex_file.StringByTypeIdx(params->GetTypeItem(idx).type_idx_);
-                str_stream << ", ";
-            }
-            str_stream << dex_file.StringByTypeIdx(params->GetTypeItem(param_count - 1).type_idx_);
-        }
-        str_stream << ')';
-
-        printf("\t%s %s %s\n", rtn_type, method_name, str_stream.str().c_str());
+        uint32_t dex_method_idx = it.GetMemberIndex();
+        os << StringPrintf("\t%d: %s (dex_method_idx=%d)\n", class_method_idx,
+                           PrettyMethod(dex_method_idx, dex_file, true).c_str(),
+                           dex_method_idx);
         const DexFile::CodeItem* code_item = it.GetMethodCodeItem();
-        DumpDexCode(dex_file, code_item);
-
-        //class_method_index++;
+        DumpDexCode(os, dex_file, code_item);
+        os << '\n';
         it.Next();
+        ++class_method_idx;
     }
     assert(!it.HasNext());
-
-    return rc;
 }
 
-void DumpDexCode(const DexFile& dex_file, const DexFile::CodeItem* code_item)
+void DumpDexCode(std::ostream& os, const DexFile& dex_file,
+                 const DexFile::CodeItem* code_item)
 {
-    if (code_item != nullptr) {
-        size_t i = 0;
-        while (i < code_item->insns_size_in_code_units_) {
-            const Instruction* instruction = Instruction::At(&code_item->insns_[i]);
-            std::string str =  StringPrintf("0x%04zx: %s", i, instruction->DumpString(&dex_file).c_str());
-            i += instruction->SizeInCodeUnits();
-            printf("\t\t%s\n", str.c_str());
-        }
+    if (!code_item)
+        return;
+    size_t inst_off = 0;
+    while (inst_off < code_item->insns_size_in_code_units_) {
+        const Instruction* instruction = Instruction::At(&code_item->insns_[inst_off]);
+        os << StringPrintf("\t\t0x%04zx: %s\n", inst_off,
+                           instruction->DumpString(&dex_file).c_str());
+        inst_off += instruction->SizeInCodeUnits();
     }
 }
