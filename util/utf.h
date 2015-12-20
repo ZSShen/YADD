@@ -5,6 +5,7 @@
 
 #include "globals.h"
 
+
 /*
  * All UTF-8 in art is actually modified UTF-8. Mostly, this distinction
  * doesn't matter.
@@ -29,22 +30,6 @@ size_t CountModifiedUtf8Chars(const char* utf8);
  * out of dex files or other internal translations, so the only real
  * risk comes from the JNI NewStringUTF call.
  */
-inline uint16_t GetUtf16FromUtf8(const char** utf8_data_in)
-{
-	uint8_t one = *(*utf8_data_in)++;
-    if ((one & 0x80) == 0) {
-        // one-byte encoding
-        return one;
-    }
-    // two- or three-byte encoding
-    uint8_t two = *(*utf8_data_in)++;
-    if ((one & 0x20) == 0) {
-        // two-byte encoding
-        return ((one & 0x1f) << 6) | (two & 0x3f);
-    }
-    // three-byte encoding
-    uint8_t three = *(*utf8_data_in)++;
-    return ((one & 0x0f) << 12) | ((two & 0x3f) << 6) | (three & 0x3f);
-}
+uint16_t GetUtf16FromUtf8(const char** utf8_data_in);
 
 #endif

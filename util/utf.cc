@@ -1,5 +1,6 @@
 
 #include "utf.h"
+#include "utf-inl.h"
 
 
 size_t CountModifiedUtf8Chars(const char* utf8)
