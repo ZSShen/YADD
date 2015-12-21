@@ -12,14 +12,14 @@
 
 
 void SkipAllFields();
-void DumpDexFile(std::ostream&, const DexFile&);
-void DumpDexClass(std::ostream&, const DexFile&, const DexFile::ClassDef&);
+void DumpDexFile(std::ostream&, char, const DexFile&);
+void DumpDexClass(std::ostream&, char, const DexFile&, const DexFile::ClassDef&);
 void DumpDexCode(std::ostream&, const DexFile&, const DexFile::CodeItem*);
 
 
 int main(int argc, char** argv)
 {
-    char *opt_granu, *opt_in, *opt_out;
+    char opt_granu, *opt_in, *opt_out;
 
     if (!ParseDumperOption(argc, argv, &opt_granu, &opt_in, &opt_out))
         return kExitError;
@@ -45,12 +45,12 @@ int main(int argc, char** argv)
         return kExitError;
 
     if (!opt_out)
-        DumpDexFile(std::cout, *dex_file.get());
+        DumpDexFile(std::cout, opt_granu, *dex_file.get());
     else {
         std::ofstream ofs(opt_out, std::ofstream::out);
         if (!ofs.good())
             return kExitError;
-        DumpDexFile(ofs, *dex_file.get());
+        DumpDexFile(ofs, opt_granu, *dex_file.get());
     }
     return kExitSucc;
 }
@@ -64,19 +64,21 @@ void SkipAllFields(ClassDataItemIterator& it)
         it.Next();
 }
 
-void DumpDexFile(std::ostream& os, const DexFile& dex_file)
+void DumpDexFile(std::ostream& os, char opt_granu, const DexFile& dex_file)
 {
     uint32_t num_class_def = dex_file.NumClassDefs();
     for (uint32_t class_def_idx = 0 ; class_def_idx < num_class_def ; ++class_def_idx) {
         os << StringPrintf("%d: %s\n", class_def_idx,
                            PrettyClass(class_def_idx, dex_file).c_str());
+        if (opt_granu == kGranuCodeClass)
+            continue;
         const DexFile::ClassDef& class_def = dex_file.GetClassDef(class_def_idx);
-        DumpDexClass(os, dex_file, class_def);
+        DumpDexClass(os, opt_granu, dex_file, class_def);
         os << '\n';
     }
 }
 
-void DumpDexClass(std::ostream& os, const DexFile& dex_file,
+void DumpDexClass(std::ostream& os, char opt_granu, const DexFile& dex_file,
                   const DexFile::ClassDef& class_def)
 {
     const byte* class_data = dex_file.GetClassData(class_def);
@@ -92,9 +94,11 @@ void DumpDexClass(std::ostream& os, const DexFile& dex_file,
         os << StringPrintf("\t%d: %s (dex_method_idx=%d)\n", class_method_idx,
                            PrettyMethod(dex_method_idx, dex_file, true).c_str(),
                            dex_method_idx);
-        const DexFile::CodeItem* code_item = it.GetMethodCodeItem();
-        DumpDexCode(os, dex_file, code_item);
-        os << '\n';
+        if (opt_granu == kGranuCodeInstruction) {
+            const DexFile::CodeItem* code_item = it.GetMethodCodeItem();
+            DumpDexCode(os, dex_file, code_item);
+            os << '\n';
+        }
         it.Next();
         ++class_method_idx;
     }
@@ -104,9 +108,11 @@ void DumpDexClass(std::ostream& os, const DexFile& dex_file,
         os << StringPrintf("\t%d: %s (dex_method_idx=%d)\n", class_method_idx,
                            PrettyMethod(dex_method_idx, dex_file, true).c_str(),
                            dex_method_idx);
-        const DexFile::CodeItem* code_item = it.GetMethodCodeItem();
-        DumpDexCode(os, dex_file, code_item);
-        os << '\n';
+        if (opt_granu == kGranuCodeInstruction) {
+            const DexFile::CodeItem* code_item = it.GetMethodCodeItem();
+            DumpDexCode(os, dex_file, code_item);
+            os << '\n';
+        }
         it.Next();
         ++class_method_idx;
     }

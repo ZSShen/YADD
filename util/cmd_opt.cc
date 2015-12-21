@@ -18,7 +18,7 @@ static void PrintDumperUsage()
 
 
 bool ParseDumperOption(int argc, char **argv,
-                       char **opt_granu, char **opt_in, char **opt_out)
+                       char *opt_granu, char **opt_in, char **opt_out)
 {
     struct option opts[] = {
         {kOptLongGranularity, required_argument, 0, kOptGranularity},
@@ -30,14 +30,15 @@ bool ParseDumperOption(int argc, char **argv,
     memset(order, 0, sizeof(char) * kBlahSizeTiny);
     sprintf(order, "%c:%c:%c:", kOptGranularity, kOptInput, kOptOutput);
 
-    *opt_granu = *opt_in = *opt_out = nullptr;
+    char *granu_str = nullptr;
+    *opt_in = *opt_out = nullptr;
     int opt, idx_opt;
     pid_t pid_zygote = 0;
     char *sz_app = NULL, *sz_path = NULL;
     while ((opt = getopt_long(argc, argv, order, opts, &idx_opt)) != -1) {
         switch (opt) {
           case kOptGranularity:
-            *opt_granu = optarg;
+            granu_str = optarg;
             break;
           case kOptInput:
             *opt_in = optarg;
@@ -55,13 +56,22 @@ bool ParseDumperOption(int argc, char **argv,
         PrintDumperUsage();
         return false;
     }
-    if (*opt_granu == nullptr)
-        *opt_granu = const_cast<char*>(kGranularityInstruction);
-    if (!strcmp(*opt_granu, kGranularityClass) &&
-        !strcmp(*opt_granu, kGranularityMethod) &&
-        !strcmp(*opt_granu, kGranularityInstruction)) {
-        PrintDumperUsage();
-        return false;
+    if (granu_str == nullptr)
+        granu_str = const_cast<char*>(kGranularityInstruction);
+
+    if (strcmp(granu_str, kGranularityClass) == 0)
+        *opt_granu = kGranuCodeClass;
+    else {
+        if (strcmp(granu_str, kGranularityMethod) == 0)
+            *opt_granu = kGranuCodeMethod;
+        else {
+            if (strcmp(granu_str, kGranularityInstruction) == 0)
+                *opt_granu = kGranuCodeInstruction;
+            else {
+                PrintDumperUsage();
+                return false;
+            }
+        }
     }
     return true;
 }
