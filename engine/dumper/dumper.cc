@@ -33,7 +33,7 @@ int main(int argc, char** argv)
 
     // Map the file into memory.
     byte* base = reinterpret_cast<byte*>(mmap(nullptr, size, PROT_READ,
-                                               MAP_PRIVATE, fd.get(), 0));
+                                              MAP_PRIVATE, fd.get(), 0));
     if (base == MAP_FAILED) {
         ERROR("Fail to map the dex file into memory.");
         return kExitError;
@@ -44,7 +44,14 @@ int main(int argc, char** argv)
     if (dex_file.get() == nullptr)
         return kExitError;
 
-    DumpDexFile(std::cout, *dex_file.get());
+    if (!opt_out)
+        DumpDexFile(std::cout, *dex_file.get());
+    else {
+        std::ofstream ofs(opt_out, std::ofstream::out);
+        if (!ofs.good())
+            return kExitError;
+        DumpDexFile(ofs, *dex_file.get());
+    }
     return kExitSucc;
 }
 
@@ -61,9 +68,9 @@ void DumpDexFile(std::ostream& os, const DexFile& dex_file)
 {
     uint32_t num_class_def = dex_file.NumClassDefs();
     for (uint32_t class_def_idx = 0 ; class_def_idx < num_class_def ; ++class_def_idx) {
+        os << StringPrintf("%d: %s\n", class_def_idx,
+                           PrettyClass(class_def_idx, dex_file).c_str());
         const DexFile::ClassDef& class_def = dex_file.GetClassDef(class_def_idx);
-        const char* descriptor = dex_file.GetClassDescriptor(class_def);
-        os << StringPrintf("%d: %s\n", class_def_idx, descriptor);
         DumpDexClass(os, dex_file, class_def);
         os << '\n';
     }

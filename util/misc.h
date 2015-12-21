@@ -35,6 +35,9 @@ std::string PrettyField(uint32_t field_idx, const DexFile& dex_file,
 std::string PrettyMethod(uint32_t method_idx, const DexFile& dex_file,
 						 bool with_signature = true);
 
+// Returns a human-readable form of the name of the given class.
+std::string PrettyClass(uint32_t class_def_idx, const DexFile& dex_file);
+
 // Returns a human-readable form of the type at an index in the specified dex file.
 // Example outputs: char[], java.lang.String.
 std::string PrettyType(uint32_t type_idx, const DexFile& dex_file);

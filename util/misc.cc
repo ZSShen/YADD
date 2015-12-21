@@ -153,6 +153,14 @@ std::string PrettyMethod(uint32_t method_idx, const DexFile& dex_file, bool with
     return result;
 }
 
+std::string PrettyClass(uint32_t class_def_idx, const DexFile& dex_file)
+{
+    if (class_def_idx >= dex_file.NumClassDefs())
+        return StringPrintf("<<invalid-class-def-idx-%d>>", class_def_idx);
+    const DexFile::ClassDef& class_def = dex_file.GetClassDef(class_def_idx);
+    return PrettyDescriptor(dex_file.GetClassDescriptor(class_def));
+}
+
 std::string PrettyType(uint32_t type_idx, const DexFile& dex_file)
 {
     if (type_idx >= dex_file.NumTypeIds())
@@ -160,4 +168,3 @@ std::string PrettyType(uint32_t type_idx, const DexFile& dex_file)
     const DexFile::TypeId& type_id = dex_file.GetTypeId(type_idx);
     return PrettyDescriptor(dex_file.GetTypeDescriptor(type_id));
 }
-
