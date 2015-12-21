@@ -15,7 +15,7 @@ inline int32_t DexFile::GetStringLength(const StringId& string_id) const
 inline const char* DexFile::GetStringDataAndUtf16Length(const StringId& string_id,
                                                         uint32_t* utf16_length) const
 {
-    assert(utf16_length != NULL);
+    CHECK(utf16_length != nullptr);
     const byte* ptr = begin_ + string_id.string_data_off_;
     *utf16_length = DecodeUnsignedLeb128(&ptr);
     return reinterpret_cast<const char*>(ptr);
@@ -71,10 +71,10 @@ inline bool Signature::operator==(const Signature& rhs) const
         const DexFile::TypeList* params = dex_file_->GetProtoParameters(*proto_id_);
         const DexFile::TypeList* rhs_params = rhs.dex_file_->GetProtoParameters(*rhs.proto_id_);
         // Both lists are empty or have contents, or else shorty is broken.
-        assert((params == nullptr) == (rhs_params == nullptr));
+        CHECK_EQ((params == nullptr), (rhs_params == nullptr));
         if (params != nullptr) {
             uint32_t params_size = params->Size();
-            assert(params_size == rhs_params->Size());  // Parameter list size must match.
+            CHECK_EQ(params_size, rhs_params->Size());  // Parameter list size must match.
             for (uint32_t i = 0; i < params_size; ++i) {
                 const DexFile::TypeId& param_id = dex_file_->GetTypeId(params->GetTypeItem(i).type_idx_);
                 const DexFile::TypeId& rhs_param_id =

@@ -218,7 +218,7 @@ class DexFile
 
         const TypeItem& GetTypeItem(uint32_t idx) const
         {
-            assert(idx < this->size_);
+            CHECK_LT(idx, this->size_);
             return this->list_[idx];
         }
 
@@ -388,21 +388,21 @@ class DexFile
     // Returns the number of string identifiers in the .dex file.
     size_t NumStringIds() const
     {
-        assert(header_ != nullptr);
+        CHECK(header_ != nullptr);
         return header_->string_ids_size_;
     }
 
     // Returns the StringId at the specified index.
     const StringId& GetStringId(uint32_t idx) const
     {
-        assert(idx < NumStringIds());
+        CHECK_LT(idx, NumStringIds());
         return string_ids_[idx];
     }
 
     uint32_t GetIndexForStringId(const StringId& string_id) const
     {
-        assert(&string_id >= string_ids_);
-        assert(&string_id < string_ids_ + header_->string_ids_size_);
+        CHECK_GE(&string_id, string_ids_);
+        CHECK_LT(&string_id, string_ids_ + header_->string_ids_size_);
         return &string_id - string_ids_;
     }
 
@@ -445,23 +445,23 @@ class DexFile
     // Returns the number of type identifiers in the .dex file.
     uint32_t NumTypeIds() const
     {
-        assert(header_ != nullptr);
+        CHECK(header_ != nullptr);
         return header_->type_ids_size_;
     }
 
     // Returns the TypeId at the specified index.
     const TypeId& GetTypeId(uint32_t idx) const
     {
-        assert(idx < NumTypeIds());
+        CHECK_LT(idx, NumTypeIds());
         return type_ids_[idx];
     }
 
     uint16_t GetIndexForTypeId(const TypeId& type_id) const
     {
-        assert(&type_id >= type_ids_);
-        assert(&type_id < type_ids_ + header_->type_ids_size_);
+        CHECK_GE(&type_id, type_ids_);
+        CHECK_LT(&type_id, type_ids_ + header_->type_ids_size_);
         size_t result = &type_id - type_ids_;
-        assert(result < 65536U);
+        CHECK_LT(result, 65536U);
         return static_cast<uint16_t>(result);
     }
 
@@ -491,21 +491,21 @@ class DexFile
     // Returns the number of field identifiers in the .dex file.
     size_t NumFieldIds() const
     {
-        assert(header_ != nullptr);
+        CHECK(header_ != nullptr);
         return header_->field_ids_size_;
     }
 
     // Returns the FieldId at the specified index.
     const FieldId& GetFieldId(uint32_t idx) const
     {
-        assert(idx < NumFieldIds());
+        CHECK_LT(idx, NumFieldIds());
         return field_ids_[idx];
     }
 
     uint32_t GetIndexForFieldId(const FieldId& field_id) const
     {
-        assert(&field_id >= field_ids_);
-        assert(&field_id < field_ids_ + header_->field_ids_size_);
+        CHECK_GE(&field_id, field_ids_);
+        CHECK_LT(&field_id, field_ids_ + header_->field_ids_size_);
         return &field_id - field_ids_;
     }
 
@@ -535,21 +535,21 @@ class DexFile
     // Returns the number of method identifiers in the .dex file.
     size_t NumMethodIds() const
     {
-        assert(header_ != nullptr);
+        CHECK(header_ != nullptr);
         return header_->method_ids_size_;
     }
 
     // Returns the MethodId at the specified index.
     const MethodId& GetMethodId(uint32_t idx) const
     {
-        assert(idx < NumMethodIds());
+        CHECK_LT(idx, NumMethodIds());
         return method_ids_[idx];
     }
 
     uint32_t GetIndexForMethodId(const MethodId& method_id) const
     {
-        assert(&method_id >= method_ids_);
-        assert(&method_id < method_ids_ + header_->method_ids_size_);
+        CHECK_GE(&method_id, method_ids_);
+        CHECK_LT(&method_id, method_ids_ + header_->method_ids_size_);
         return &method_id - method_ids_;
     }
 
@@ -593,21 +593,21 @@ class DexFile
     // Returns the number of class definitions in the .dex file.
     uint32_t NumClassDefs() const
     {
-        assert(header_ != nullptr);
+        CHECK(header_ != nullptr);
         return header_->class_defs_size_;
     }
 
     // Returns the ClassDef at the specified index.
     const ClassDef& GetClassDef(uint16_t idx) const
     {
-        assert(idx < NumClassDefs());
+        CHECK_LT(idx, NumClassDefs());
         return class_defs_[idx];
     }
 
     uint16_t GetIndexForClassDef(const ClassDef& class_def) const
     {
-        assert(&class_def >= class_defs_);
-        assert(&class_def < class_defs_ + header_->class_defs_size_);
+        CHECK_GE(&class_def, class_defs_);
+        CHECK_LT(&class_def, class_defs_ + header_->class_defs_size_);
         return &class_def - class_defs_;
     }
 
@@ -662,21 +662,21 @@ class DexFile
     // Returns the number of prototype identifiers in the .dex file.
     size_t NumProtoIds() const
     {
-        assert(header_ != nullptr);
+        CHECK(header_ != nullptr);
         return header_->proto_ids_size_;
     }
 
     // Returns the ProtoId at the specified index.
     const ProtoId& GetProtoId(uint32_t idx) const
     {
-        assert(idx < NumProtoIds());
+        CHECK_LT(idx, NumProtoIds());
         return proto_ids_[idx];
     }
 
     uint16_t GetIndexForProtoId(const ProtoId& proto_id) const
     {
-        assert(&proto_id >= proto_ids_);
-        assert(&proto_id < proto_ids_ + header_->proto_ids_size_);
+        CHECK_GE(&proto_id, proto_ids_);
+        CHECK_LT(&proto_id, proto_ids_ + header_->proto_ids_size_);
         return &proto_id - proto_ids_;
     }
 
@@ -854,7 +854,7 @@ class ClassDataItemIterator
             last_idx_ = GetMemberIndex();
             ReadClassDataMethod();
         } else
-            assert(!HasNext());
+            CHECK(!HasNext());
     }
 
     uint32_t GetMemberIndex() const
@@ -862,7 +862,7 @@ class ClassDataItemIterator
         if (pos_ < EndOfInstanceFieldsPos())
             return last_idx_ + field_.field_idx_delta_;
         else {
-            assert(pos_ < EndOfVirtualMethodsPos());
+            CHECK_LT(pos_, EndOfVirtualMethodsPos());
             return last_idx_ + method_.method_idx_delta_;
         }
     }
@@ -872,7 +872,7 @@ class ClassDataItemIterator
         if (pos_ < EndOfInstanceFieldsPos()) {
             return field_.access_flags_;
         } else {
-            assert(pos_ < EndOfVirtualMethodsPos());
+            CHECK_LT(pos_, EndOfVirtualMethodsPos());
             return method_.access_flags_;
         }
     }
@@ -905,7 +905,7 @@ class ClassDataItemIterator
             else
                 return kDirect;
         } else {
-            assert(GetRawMemberAccessFlags() & kAccStatic == 0U);
+            CHECK_EQ(GetRawMemberAccessFlags() & kAccStatic, 0U);
             if ((class_def.access_flags_ & kAccInterface) != 0)
                 return kInterface;
             else if ((GetRawMemberAccessFlags() & kAccConstructor) != 0)
@@ -927,7 +927,7 @@ class ClassDataItemIterator
 
     const byte* EndDataPointer() const
     {
-        assert(!HasNext());
+        CHECK(!HasNext());
         return ptr_pos_;
     }
 

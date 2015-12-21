@@ -23,7 +23,7 @@ bool DexFile::IsVersionValid(const byte* magic)
 std::string Signature::ToString() const
 {
     if (dex_file_ == nullptr) {
-        assert(proto_id_ == nullptr);
+        CHECK(proto_id_ == nullptr);
         return "<no signature>";
     }
     const DexFile::TypeList* params = dex_file_->GetProtoParameters(*proto_id_);
@@ -96,7 +96,7 @@ const DexFile* DexFile::OpenMemory(byte* base, size_t size, ScopedMap& mem_map)
 // Decodes the header section from the class data bytes.
 void ClassDataItemIterator::ReadClassDataHeader()
 {
-    assert(ptr_pos_ != nullptr);
+    CHECK(ptr_pos_ != nullptr);
     header_.static_fields_size_ = DecodeUnsignedLeb128(&ptr_pos_);
     header_.instance_fields_size_ = DecodeUnsignedLeb128(&ptr_pos_);
     header_.direct_methods_size_ = DecodeUnsignedLeb128(&ptr_pos_);

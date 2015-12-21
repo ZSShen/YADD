@@ -115,7 +115,7 @@ void DumpDexClass(std::ostream& os, char opt_granu, const DexFile& dex_file,
         it.Next();
         ++class_method_idx;
     }
-    assert(!it.HasNext());
+    CHECK(!it.HasNext());
 }
 
 void DumpDexCode(std::ostream& os, const DexFile& dex_file,
