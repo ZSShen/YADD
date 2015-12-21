@@ -83,11 +83,11 @@ const DexFile* DexFile::OpenMemory(byte* base, size_t size, ScopedMap& mem_map)
 {
     std::unique_ptr<DexFile> dex_file(new DexFile(base, size, mem_map));
     if (!IsMagicValid(dex_file->header_->magic_)) {
-        ERROR("Invalid DEX magic.");
+        LOG(ERROR) << "Invalid DEX magic.";
         return nullptr;
     }
     if (!IsVersionValid(dex_file->header_->magic_ + 4)) {
-        ERROR("Invalid DEX magic version.");
+        LOG(ERROR) << "Invalid DEX magic version.";
         return nullptr;
     }
     return dex_file.release();
@@ -108,7 +108,7 @@ void ClassDataItemIterator::ReadClassDataField()
     field_.field_idx_delta_ = DecodeUnsignedLeb128(&ptr_pos_);
     field_.access_flags_ = DecodeUnsignedLeb128(&ptr_pos_);
     if (last_idx_ != 0 && field_.field_idx_delta_ == 0)
-        LOG("Duplicated field.");
+        LOG(WARNING) << "Duplicated field.";
 }
 
 void ClassDataItemIterator::ReadClassDataMethod()
@@ -117,5 +117,5 @@ void ClassDataItemIterator::ReadClassDataMethod()
     method_.access_flags_ = DecodeUnsignedLeb128(&ptr_pos_);
     method_.code_off_ = DecodeUnsignedLeb128(&ptr_pos_);
     if (last_idx_ != 0 && method_.method_idx_delta_ == 0)
-        LOG("Duplicated method.");
+        LOG(WARNING) << "Duplicated field.";
 }

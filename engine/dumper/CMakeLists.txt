@@ -9,6 +9,7 @@ set(PATH_SRC_DEX_FILE           "${ROOT_SRC}/dex_file.cc")
 set(PATH_SRC_DEX_INSTRUCTION    "${ROOT_SRC}/dex_instruction.cc")
 set(PATH_SRC_DUMPER             "${ROOT_SRC}/dumper.cc")
 set(PATH_SRC_SPEW               "${ROOT_SRC}/../../util/spew.cc")
+set(PATH_SRC_LOG                "${ROOT_SRC}/../../util/log.cc")
 set(PATH_SRC_STRINGPRINTF       "${ROOT_SRC}/../../util/stringprintf.cc")
 set(PATH_SRC_STRINGPIECE        "${ROOT_SRC}/../../util/stringpiece.cc")
 set(PATH_SRC_MISC               "${ROOT_SRC}/../../util/misc.cc")
@@ -47,7 +48,7 @@ add_executable(${TGE_EXE}
                ${PATH_SRC_MISC}
                ${PATH_SRC_STRINGPIECE}
                ${PATH_SRC_STRINGPRINTF}
-               ${PATH_SRC_SPEW}
+               ${PATH_SRC_LOG}
                ${PATH_SRC_DEX_FILE}
                ${PATH_SRC_DEX_INSTRUCTION}
                ${PATH_SRC_CMD_OPT}

@@ -1,7 +1,7 @@
 
 #include "misc.h"
 #include "stringprintf.h"
-#include "spew.h"
+#include "log.h"
 #include "dex_instruction-inl.h"
 #include "dex_file.h"
 
@@ -67,8 +67,8 @@ int32_t Instruction::GetTargetOffset() const
       case k20t: return VRegA_20t();
       case k30t: return VRegA_30t();
       default:
-        ERROR("Tried to access the branch offset of an instruction %s which "
-              "does not have a target operand.", Name());
+        LOG(FATAL) << "Tried to access the branch offset of an instruction " <<
+        Name() << " which does not have a target operand.";
   }
   return 0;
 }
@@ -100,7 +100,7 @@ size_t Instruction::SizeInCodeUnitsComplexOpcode() const
         if ((*insns & 0xFF) == 0)
             return 1;  // NOP.
         else {
-            ERROR("Unreachable: %s", DumpString(nullptr).c_str());
+            LOG(FATAL) << "Unreachable: " << DumpString(NULL);
             return 0;
         }
     }

@@ -68,8 +68,8 @@ inline int32_t Instruction::VRegA() const
       case k3rc: return VRegA_3rc();
       case k51l: return VRegA_51l();
       default:
-        ERROR("Tried to access vA of instruction %s which has no A operand.", Name());
-        exit(-1);
+        LOG(FATAL) << "Tried to access vA of instruction " << Name()
+        << " which has no A operand.";
     }
 }
 
@@ -274,8 +274,8 @@ inline int32_t Instruction::VRegB() const
       case k3rc: return VRegB_3rc();
       case k51l: return VRegB_51l();
       default:
-        ERROR("Tried to access vB of instruction %s which has no B operand.", Name());
-        exit(-1);
+        LOG(FATAL) << "Tried to access vB of instruction " << Name()
+        << " which has no B operand.";
     }
 }
 
@@ -427,8 +427,8 @@ inline int32_t Instruction::VRegC() const
       case k35c: return VRegC_35c();
       case k3rc: return VRegC_3rc();
       default:
-        ERROR("Tried to access vC of instruction %s which has no C operand.", Name());
-        exit(-1);
+        LOG(FATAL) << "Tried to access vC of instruction " << Name()
+        << " which has no C operand.";
     }
 }
 

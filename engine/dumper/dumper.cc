@@ -1,7 +1,7 @@
 
 #include "globals.h"
-#include "status.h"
 #include "cmd_opt.h"
+#include "log.h"
 
 #include "scoped_fd.h"
 #include "scoped_map.h"
@@ -22,10 +22,12 @@ int main(int argc, char** argv)
     char opt_granu, *opt_in, *opt_out;
 
     if (!ParseDumperOption(argc, argv, &opt_granu, &opt_in, &opt_out))
-        return kExitError;
+        return EXIT_FAILURE;
 
     // Calculate the to be mapped space size.
     ScopedFd fd(open(opt_in, O_RDONLY, 0));
+    if (fd.get() == -1)
+        LOG(FATAL) << "Fail to open the dex file.";
     size_t size = static_cast<size_t>(lseek(fd.get(), 0, SEEK_END));
     div_t result = div(size, kPageSize);
     size_t algn_size = (result.rem != 0)? (kPageSize * (result.quot + 1)) :
@@ -34,25 +36,22 @@ int main(int argc, char** argv)
     // Map the file into memory.
     byte* base = reinterpret_cast<byte*>(mmap(nullptr, size, PROT_READ,
                                               MAP_PRIVATE, fd.get(), 0));
-    if (base == MAP_FAILED) {
-        ERROR("Fail to map the dex file into memory.");
-        return kExitError;
-    }
-
+    if (base == MAP_FAILED)
+        LOG(FATAL) << "Fail to map the dex file into memory.";
     ScopedMap mem_map(base, size, algn_size);
     std::unique_ptr<const DexFile> dex_file(DexFile::OpenMemory(mem_map));
     if (dex_file.get() == nullptr)
-        return kExitError;
+        return EXIT_FAILURE;
 
     if (!opt_out)
         DumpDexFile(std::cout, opt_granu, *dex_file.get());
     else {
         std::ofstream ofs(opt_out, std::ofstream::out);
         if (!ofs.good())
-            return kExitError;
+            return EXIT_FAILURE;
         DumpDexFile(ofs, opt_granu, *dex_file.get());
     }
-    return kExitSucc;
+    return EXIT_SUCCESS;
 }
 
 

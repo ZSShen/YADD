@@ -5,7 +5,7 @@
 
 #include "globals.h"
 #include "macros.h"
-#include "spew.h"
+#include "log.h"
 #include "scoped_fd.h"
 #include "scoped_map.h"
 
@@ -16,7 +16,6 @@
 
 
 class Signature;
-//class StringPiece;
 
 class DexFile
 {
