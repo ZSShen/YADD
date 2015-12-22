@@ -101,7 +101,7 @@ std::string PrettyArguments(const char* signature)
 {
     std::string result;
     result += '(';
-    assert(*signature == '(');
+    CHECK_EQ(*signature, '(');
     ++signature;  // Skip the '('.
     while (*signature != ')') {
         size_t argument_length = 0;
@@ -119,7 +119,7 @@ std::string PrettyArguments(const char* signature)
             result += ", ";
         signature += argument_length;
     }
-    assert(*signature == ')');
+    CHECK_EQ(*signature, ')');
     ++signature;  // Skip the ')'.
     result += ')';
     return result;
@@ -128,7 +128,7 @@ std::string PrettyArguments(const char* signature)
 std::string PrettyReturnType(const char* signature)
 {
     const char* return_type = strchr(signature, ')');
-    assert(return_type != NULL);
+    CHECK(return_type != nullptr);
     ++return_type;  // Skip ')'.
     return PrettyDescriptor(return_type);
 }

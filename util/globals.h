@@ -22,7 +22,6 @@
 #include <inttypes.h>
 #include <getopt.h>
 
-#include <assert.h>
 #include <unistd.h>
 #include <errno.h>
 #include <fcntl.h>
