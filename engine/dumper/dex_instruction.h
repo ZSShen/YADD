@@ -180,7 +180,7 @@ class Instruction
     // Reads an instruction out of the stream at the specified address.
     static const Instruction* At(const uint16_t* code)
     {
-        assert(code != NULL);
+        CHECK(code != nullptr);
         return reinterpret_cast<const Instruction*>(code);
     }
 
@@ -199,28 +199,28 @@ class Instruction
     // Returns a pointer to the instruction after this 1xx instruction in the stream.
     const Instruction* Next_1xx() const
     {
-        assert(FormatOf(Opcode()) >= k10x && FormatOf(Opcode()) <= k10t);
+        CHECK(FormatOf(Opcode()) >= k10x && FormatOf(Opcode()) <= k10t);
         return RelativeAt(1);
     }
 
     // Returns a pointer to the instruction after this 2xx instruction in the stream.
     const Instruction* Next_2xx() const
     {
-        assert(FormatOf(Opcode()) >= k20t && FormatOf(Opcode()) <= k22c);
+        CHECK(FormatOf(Opcode()) >= k20t && FormatOf(Opcode()) <= k22c);
         return RelativeAt(2);
     }
 
     // Returns a pointer to the instruction after this 3xx instruction in the stream.
     const Instruction* Next_3xx() const
     {
-        assert(FormatOf(Opcode()) >= k32x && FormatOf(Opcode()) <= k3rc);
+        CHECK(FormatOf(Opcode()) >= k32x && FormatOf(Opcode()) <= k3rc);
         return RelativeAt(3);
     }
 
     // Returns a pointer to the instruction after this 51l instruction in the stream.
     const Instruction* Next_51l() const
     {
-        assert(FormatOf(Opcode()) == k51l);
+        CHECK(FormatOf(Opcode()) == k51l);
         return RelativeAt(5);
     }
 
@@ -456,7 +456,7 @@ class Instruction
     // parameter must be the first 16 bits of instruction.
     Code Opcode(uint16_t inst_data) const
     {
-        assert(inst_data == Fetch16(0));
+        CHECK_EQ(inst_data, Fetch16(0));
         return static_cast<Code>(inst_data & 0xFF);
     }
 
@@ -468,35 +468,35 @@ class Instruction
 
     void SetOpcode(Code opcode)
     {
-        assert(static_cast<uint16_t>(opcode) < 256u);
+        CHECK_LT(static_cast<uint16_t>(opcode), 256u);
         uint16_t* insns = reinterpret_cast<uint16_t*>(this);
         insns[0] = (insns[0] & 0xff00) | static_cast<uint16_t>(opcode);
     }
 
     void SetVRegA_10x(uint8_t val)
     {
-        assert(FormatOf(Opcode()) == k10x);
+        CHECK(FormatOf(Opcode()) == k10x);
         uint16_t* insns = reinterpret_cast<uint16_t*>(this);
         insns[0] = (val << 8) | (insns[0] & 0x00ff);
     }
 
     void SetVRegB_3rc(uint16_t val)
     {
-        assert(FormatOf(Opcode()) == k3rc);
+        CHECK(FormatOf(Opcode()) == k3rc);
         uint16_t* insns = reinterpret_cast<uint16_t*>(this);
         insns[1] = val;
     }
 
     void SetVRegB_35c(uint16_t val)
     {
-        assert(FormatOf(Opcode()) == k35c);
+        CHECK(FormatOf(Opcode()) == k35c);
         uint16_t* insns = reinterpret_cast<uint16_t*>(this);
         insns[1] = val;
     }
 
     void SetVRegC_22c(uint16_t val)
     {
-        assert(FormatOf(Opcode()) == k22c);
+        CHECK(FormatOf(Opcode()) == k22c);
         uint16_t* insns = reinterpret_cast<uint16_t*>(this);
         insns[1] = val;
     }
@@ -641,19 +641,19 @@ class Instruction
 
     uint4_t InstA(uint16_t inst_data) const
     {
-        assert(inst_data == Fetch16(0));
+        CHECK_EQ(inst_data, Fetch16(0));
         return static_cast<uint4_t>((inst_data >> 8) & 0x0f);
     }
 
     uint4_t InstB(uint16_t inst_data) const
     {
-        assert(inst_data == Fetch16(0));
+        CHECK_EQ(inst_data, Fetch16(0));
         return static_cast<uint4_t>(inst_data >> 12);
     }
 
     uint8_t InstAA(uint16_t inst_data) const
     {
-        assert(inst_data == Fetch16(0));
+        CHECK_EQ(inst_data, Fetch16(0));
         return static_cast<uint8_t>(inst_data >> 8);
     }
 
