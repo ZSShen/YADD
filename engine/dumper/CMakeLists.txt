@@ -82,6 +82,10 @@ set(PATH_INC_DUMPER "${ROOT_SRC}")
 # The binary output path.
 set(PATH_OUT "${ROOT_SRC}/../../bin")
 
+# In this POC stage, I prefer pure dumper executable.
+set(PURE_DUMPER "true")
+set(BIN_TYPE "exe")
+
 set(TGE "YADD")
 if (PURE_DUMPER)
     SUB_BUILD_PURE_DUMPER()

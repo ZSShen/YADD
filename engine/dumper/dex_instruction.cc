@@ -136,17 +136,17 @@ std::string Instruction::DumpString(const DexFile* file) const
       case k21t:  os << StringPrintf("%s v%d, %+d", opcode, VRegA_21t(), VRegB_21t()); break;
       case k21s:  os << StringPrintf("%s v%d, #%+d", opcode, VRegA_21s(), VRegB_21s()); break;
       case k21h: {
-        // op vAA, #+BBBB0000[00000000]
-        if (Opcode() == CONST_HIGH16) {
-            uint32_t value = VRegB_21h() << 16;
-            os << StringPrintf("%s v%d, #int %+d // 0x%x", opcode, VRegA_21h(), value, value);
-        } else {
-            uint64_t value = static_cast<uint64_t>(VRegB_21h()) << 48;
-            os << StringPrintf("%s v%d, #long %+" PRId64 " // 0x%" PRIx64, opcode, VRegA_21h(),
-                               value, value);
+          // op vAA, #+BBBB0000[00000000]
+          if (Opcode() == CONST_HIGH16) {
+              uint32_t value = VRegB_21h() << 16;
+              os << StringPrintf("%s v%d, #int %+d // 0x%x", opcode, VRegA_21h(), value, value);
+          } else {
+              uint64_t value = static_cast<uint64_t>(VRegB_21h()) << 48;
+              os << StringPrintf("%s v%d, #long %+" PRId64 " // 0x%" PRIx64, opcode, VRegA_21h(),
+                                 value, value);
+          }
         }
-      }
-      break;
+        break;
       case k21c: {
         switch (Opcode()) {
           case CONST_STRING:
