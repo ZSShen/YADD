@@ -86,6 +86,8 @@ set(PATH_OUT "${ROOT_SRC}/../../bin")
 set(PURE_DUMPER "true")
 set(BIN_TYPE "exe")
 
+add_definitions(-D__STDC_FORMAT_MACROS)
+
 set(TGE "YADD")
 if (PURE_DUMPER)
     SUB_BUILD_PURE_DUMPER()
