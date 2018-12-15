@@ -1,15 +1,17 @@
 [![Build Status](https://travis-ci.org/ZSShen/YADD.svg?branch=master)](https://travis-ci.org/ZSShen/YADD)
 
 
-## **Objective**
-Currently, this project is for self-studying purpose. But in essence, YADD is planed to be a complex disassembler for the Android Dex bytecode.  That is, a hybrid tool to support pure binary/signature dumping and to provide an interface for reversing analysis.  
+<img src="https://raw.githubusercontent.com/ZSShen/YADD/master/assets/yadd_cover.png" width="750px/">
 
-As a reversing toolkit, YADD will basically support:  
+## **Objective**
+YADD is designed to be a complex disassembler for static Android app analysis, which supports bytecode-level class and method signature extraction and offers an easy-to-use interface for reverse engineering.  
+
+As a reverse engineering toolkit, YADD should basically support:  
 + Code block differentiation and control flow visualization.  
 + Symbolic level def-use chain to highlight the data dependency between instructions.  
 
 ## **Current Progress**
-YADD is now `relying on the Dex file parsing and the instruction decoding algorithm provided by Android Open Source Project`.  It can now be built as a `independent executable for Dex code disassembling and signature dumping`. More features about control and data flow analysis will be updated in the near future.  
+YADD is now `relying on the Dex file parsing and the instruction decoding algorithm provided by Android Open Source Project`.  It can now be built as a `independent executable for Dex code disassembling and signature extraction`. More features about control and data flow analysis will be updated in the near future.  
 
 ## **Installation**
 Clone the project to your working directory.  
